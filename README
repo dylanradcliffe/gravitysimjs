@@ -1,1 +1,4 @@
-Simple gravity simulation written in Javascript
+Simple gravity simulation written in Javascript.
+
+Rocket graphic modfied from a work by conte magnus: https://openclipart.org/detail/169639/rockets-by-conte-magnus
+Phaser project template from: https://github.com/photonstorm/phaser3-project-template 
