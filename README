@@ -1,4 +1,5 @@
 Simple gravity simulation written in Javascript.
 
-Rocket graphic modfied from a work by conte magnus: https://openclipart.org/detail/169639/rockets-by-conte-magnus
 Phaser project template from: https://github.com/photonstorm/phaser3-project-template 
+Earth photo from Nasa: https://earthobservatory.nasa.gov/features/BlueMarble/BlueMarble_history.php
+ISS photo from Nasa: https://www.nasa.gov/image-feature/the-international-space-station-as-of-oct-4-2018-12

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import logoImg from './res/rocket.png';
+import rocketImg from './res/iss.png';
+import earthImg from './res/earth.jpg'
 
 class MyGame extends Phaser.Scene
 {
@@ -10,29 +11,31 @@ class MyGame extends Phaser.Scene
 
     preload ()
     {
-        this.load.image('logo', logoImg);
+        this.load.image('rocket', rocketImg);
+        this.load.image('earth', earthImg);
+
     }
       
     create ()
     {
-        const logo = this.add.image(400, 150, 'logo');
-      
-        this.tweens.add({
-            targets: logo,
-            y: 450,
-            duration: 2000,
-            ease: "Power2",
-            yoyo: true,
-            loop: -1
-        });
+        const earth = this.add.image(0, 0, 'earth');
+        earth.setScale(0.2);
+        //this.cameras.main.setPosition(config.width/2, config.height/2)
+        this.cameras.main.setBounds(-config.width/2, -config.height/2,config.width/2, config.height/2);
+
     }
+
+   
 }
 
 const config = {
     type: Phaser.AUTO,
     parent: 'phaser-example',
-    width: 800,
-    height: 600,
+    scale: {
+        mode: Phaser.Scale.FIT,
+    },
+    width: 1600,
+    height: 900,
     scene: MyGame
 };
 
