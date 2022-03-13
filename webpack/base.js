@@ -23,8 +23,13 @@ module.exports = {
         test: /\.(gif|png|jpe?g|svg|xml)$/i,
         use: "file-loader"
       }
-    ]
+    ],
   },
+   
+  externals: {
+    fsevents: "require('fsevents')"
+  },
+  
   plugins: [
     new CleanWebpackPlugin({
       root: path.resolve(__dirname, "../")

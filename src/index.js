@@ -1,38 +1,38 @@
 import Phaser from 'phaser';
 import rocketImg from './res/iss.png';
-import earthImg from './res/earth.jpg'
+import earthImg from './res/earth.jpg';
+import {Button} from './button.js'
+
 
 class MyGame extends Phaser.Scene
 {
     constructor ()
     {
-        super();
+        super();        
+    }
 
+    resetSimulation() 
+    {
         this.rocketpos = new Phaser.Math.Vector2(0, -250);
         this.rocketv = new Phaser.Math.Vector2(Phaser.Math.GetSpeed(100, 1), 0);
-
-    }
-
-    preload ()
-    {
-        this.load.image('rocket', rocketImg);
-        this.load.image('earth', earthImg);
-
-    }
-      
-    create ()
-    {
-        this.cameras.main.setBounds(-config.width/2, -config.height/2,config.width/2, config.height/2);
-
-        this.earth = this.add.image(0, 0, 'earth');
-        this.earth.setScale(0.2);
             
-        this.rocket = this.add.image(this.rocketpos.x, this.rocketpos.y, 'rocket')
-        this.rocket.setScale(0.2);
+        // update sprite 
+        this.rocket.x = this.rocketpos.x;
+        this.rocket.y = this.rocketpos.y;  
+
+        this.running = false   ;
+
 
     }
 
-    update(time, delta)
+    toggleSimulation()
+    {
+        this.running = !this.running;
+        this.startButton.setText(this.running ? "Pause" : "Start");
+        
+    }
+
+    updateSimulation(time, delta)
     {
         // update position
         //console.log(this.rocketpos)
@@ -53,11 +53,45 @@ class MyGame extends Phaser.Scene
         // update sprite 
         this.rocket.x = this.rocketpos.x;
         this.rocket.y = this.rocketpos.y;  
+    }
 
-       
+    preload ()
+    {
+        this.load.image('rocket', rocketImg);
+        this.load.image('earth', earthImg);
+
+    }
+    
+    
+
+    create ()
+    {
+        this.cameras.main.setBounds(-config.width/2, -config.height/2,config.width/2, config.height/2);
+
+        this.earth = this.add.image(0, 0, 'earth');
+        this.earth.setScale(0.3);
+            
+        this.rocket = this.add.image(0,0, 'rocket')
+        this.rocket.setScale(0.13);
+
+
+        this.resetSimulation()
+
+        this.startButton = new Button(50, 850, 'Start', this, () => {this.toggleSimulation()});
+
+        
+    }
+
+    update(time, delta)
+    {
+       if (this.running) {
+           this.updateSimulation(time, delta);
+       }
     }
     
 }
+
+
 
 const config = {
     type: Phaser.AUTO,
@@ -67,7 +101,13 @@ const config = {
     },
     width: 1600,
     height: 900,
-    scene: MyGame
+    scene: MyGame,
+    fps: {
+        target: 25,
+        forceSetTimeOut: true
+    },
+    
+        
 };
 
 const G = 3.0;
