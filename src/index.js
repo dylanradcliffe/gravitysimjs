@@ -20,17 +20,21 @@ class MyGame extends Phaser.Scene
         this.rocket.x = this.rocketpos.x;
         this.rocket.y = this.rocketpos.y;  
 
-        this.running = false   ;
-
+        this.toggleSimulation(false)
 
     }
 
-    toggleSimulation()
+    toggleSimulation(force)
     {
-        this.running = !this.running;
-        this.startButton.setText(this.running ? "Pause" : "Start");
-        
+        if (force==undefined)
+            this.running = !this.running;
+        else
+            this.running = force;
+
+        this.startButton.setText(this.running ? "Pause" : "Start");      
     }
+
+    
 
     updateSimulation(time, delta)
     {
@@ -75,11 +79,11 @@ class MyGame extends Phaser.Scene
         this.rocket.setScale(0.13);
 
 
+        this.startButton = new Button(50, 850, 'Start', this, () => {this.toggleSimulation()});
+        this.resetButtton = new Button(130, 850, 'Reset', this, () => {this.resetSimulation()});
+        
         this.resetSimulation()
 
-        this.startButton = new Button(50, 850, 'Start', this, () => {this.toggleSimulation()});
-
-        
     }
 
     update(time, delta)

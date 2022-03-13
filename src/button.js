@@ -1,5 +1,3 @@
-import { debug } from "webpack";
-
 export class Button {
     constructor(x, y, label, scene, callback) {
         this.enable()
@@ -28,9 +26,13 @@ export class Button {
     enable() {
         this.enabled = true;
     }
+    
     ifEnabled(wrapped) {
+        const button = this; // hold the button object in closuree
+                             // as 'this' take on different context
         return function() {
-        return wrapped.apply(this, arguments);
+            if (button.enabled) 
+                return wrapped.apply(this, arguments);
         }
     }
 }
