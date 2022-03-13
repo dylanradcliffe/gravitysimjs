@@ -129,8 +129,29 @@ class MyGame extends Phaser.Scene
         const angle = Phaser.Math.RoundTo(Phaser.Math.RadToDeg(delta.angle()), 1, DRAG_ANGLE_SNAP)
 
         this.rocketv.setToPolar(Phaser.Math.DegToRad(angle), speed * SPEED_MULTIPLIER)
-
     }
+
+
+    drawArrow() {
+        //this.graphics.clear();
+        this.graphics.lineStyle(10, 0xffffff, 1);
+        this.graphics.beginPath();
+
+        const arrowVector = new Phaser.Math.Vector2(this.rocketv.x/DRAG_SCALER/SPEED_MULTIPLIER,
+                                                    this.rocketv.y/DRAG_SCALER/SPEED_MULTIPLIER
+            );
+                                  
+        arrowVector.scale(1.2);
+
+        this.graphics.moveTo(this.rocketpos.x + arrowVector.x*0.2,
+                             this.rocketpos.y + arrowVector.y*0.2)
+        this.graphics.lineTo(this.rocketpos.x + arrowVector.x, 
+                            this.rocketpos.y + arrowVector.y);
+        this.graphics.strokePath();
+        this.graphics.closePath();
+      
+    }
+
 
     preload ()
     {
@@ -164,17 +185,20 @@ class MyGame extends Phaser.Scene
         
         // Set up mouse controls
         this.input.on('pointerdown', (pointer) => this.mouseDown(pointer));
-        
+        this.graphics = this.add.graphics();
+
         this.resetSimulation();
 
     }
 
     update(time, delta)
     {
+        this.graphics.clear();
        if (this.state == State.INPROGRESS && this.running) {
            this.updateSimulation(time, delta);
        } else if (this.state == State.DRAGGING) {
            this.updateVelocity(this.input.activePointer);
+           this.drawArrow();
        }
 
        // show velocity
@@ -187,6 +211,9 @@ class MyGame extends Phaser.Scene
                    .padStart(3, " ")
 
        this.velocityText.text = 'Speed:' + speedStr +  '  Angle:' + angleStr +'°'
+
+       
+       
 
     }
     
