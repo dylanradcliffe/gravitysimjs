@@ -12,6 +12,10 @@ const State = {
 const SPEED_MULTIPLIER = Phaser.Math.GetSpeed(1,1);
 const START_SPEED = 100;
 
+const DRAG_SCALER = 0.2;
+const DRAG_SPEED_SNAP = 5;
+const DRAG_ANGLE_SNAP = 10;
+
 class MyGame extends Phaser.Scene
 {
     constructor ()
@@ -101,16 +105,30 @@ class MyGame extends Phaser.Scene
 
 
     mouseDown(pointer) {
+        console.log("MOUSE DOWN!!!")
+        console.log(this.rocketv.length() + " --- " + this.rocketv.angle())
+
         if (this.state == State.INPROGRESS)
             return; // do nonthing if simulationn in progress
         
         if (this.state == State.INIT) {
-            this.startDragPos = pointer.position;
+            this.startDragPos = new Phaser.Math.Vector2(pointer.position);
             this.setState(State.DRAGGING);
         } else if (this.state == State.DRAGGING){
-            this.currentDragPos = undefined;
+            this.startDragPos = undefined;
             this.setState(State.INIT);
         }
+
+    }
+
+    updateVelocity(pointer) {
+        const delta = new Phaser.Math.Vector2(pointer.position)
+        delta.subtract(this.startDragPos)
+        const speed = Phaser.Math.RoundTo(delta.length() * DRAG_SCALER, 1, DRAG_SPEED_SNAP)
+        //const speed = delta.length() * DRAG_SCALER
+        const angle = Phaser.Math.RoundTo(Phaser.Math.RadToDeg(delta.angle()), 1, DRAG_ANGLE_SNAP)
+
+        this.rocketv.setToPolar(Phaser.Math.DegToRad(angle), speed * SPEED_MULTIPLIER)
 
     }
 
@@ -155,12 +173,14 @@ class MyGame extends Phaser.Scene
     {
        if (this.state == State.INPROGRESS && this.running) {
            this.updateSimulation(time, delta);
+       } else if (this.state == State.DRAGGING) {
+           this.updateVelocity(this.input.activePointer);
        }
 
        // show velocity
        // show velocity
        const speed = this.rocketv.length() / SPEED_MULTIPLIER
-       const angle = this.rocketv.angle() * 360 / Phaser.Math.PI2
+       const angle = Phaser.Math.RadToDeg(this.rocketv.angle());
        const speedStr = speed.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
                    .padStart(5, " ")
        const angleStr = angle.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
