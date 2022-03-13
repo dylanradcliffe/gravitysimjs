@@ -9,11 +9,14 @@ const State = {
     INPROGRESS: 2, // running or paused
 }
 
+const SPEED_MULTIPLIER = Phaser.Math.GetSpeed(1,1);
+const START_SPEED = 100;
+
 class MyGame extends Phaser.Scene
 {
     constructor ()
     {
-        super();        
+        super();      
     }
 
     setState(state) {
@@ -42,7 +45,7 @@ class MyGame extends Phaser.Scene
     resetSimulation() 
     {
         this.rocketpos = new Phaser.Math.Vector2(0, -250);
-        this.rocketv = new Phaser.Math.Vector2(Phaser.Math.GetSpeed(100, 1), 0);
+        this.rocketv = new Phaser.Math.Vector2(START_SPEED * SPEED_MULTIPLIER, 0);
             
         // update sprite 
         this.rocket.x = this.rocketpos.x;
@@ -91,15 +94,24 @@ class MyGame extends Phaser.Scene
         // update sprite 
         this.rocket.x = this.rocketpos.x;
         this.rocket.y = this.rocketpos.y;  
+
+       
+
     }
 
 
     mouseDown(pointer) {
         if (this.state == State.INPROGRESS)
-            return // do nonthing if simulationn in progress
+            return; // do nonthing if simulationn in progress
+        
+        if (this.state == State.INIT) {
+            this.startDragPos = pointer.position;
+            this.setState(State.DRAGGING);
+        } else if (this.state == State.DRAGGING){
+            this.currentDragPos = undefined;
+            this.setState(State.INIT);
+        }
 
-        console.log("mouse down");
-        console.log(pointer);
     }
 
     preload ()
@@ -123,6 +135,11 @@ class MyGame extends Phaser.Scene
         this.rocket = this.add.image(0,0, 'rocket')
         this.rocket.setScale(0.13);
 
+        this.velocityText = this.add.text(1300,0, "Speed:1000  Angle:999°")
+            .setScrollFactor(0)
+            .setStyle({ fontSize: '20px' })
+            .setFontFamily('courier')
+
         // Set up buttons
         this.startButton = new Button(50, 850, 'Start', this, () => {this.toggleSimulation()});
         this.resetButtton = new Button(130, 850, 'Reset', this, () => {this.resetSimulation()});
@@ -139,6 +156,18 @@ class MyGame extends Phaser.Scene
        if (this.state == State.INPROGRESS && this.running) {
            this.updateSimulation(time, delta);
        }
+
+       // show velocity
+       // show velocity
+       const speed = this.rocketv.length() / SPEED_MULTIPLIER
+       const angle = this.rocketv.angle() * 360 / Phaser.Math.PI2
+       const speedStr = speed.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
+                   .padStart(5, " ")
+       const angleStr = angle.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
+                   .padStart(3, " ")
+
+       this.velocityText.text = 'Speed:' + speedStr +  '  Angle:' + angleStr +'°'
+
     }
     
 }
