@@ -93,6 +93,15 @@ class MyGame extends Phaser.Scene
         this.rocket.y = this.rocketpos.y;  
     }
 
+
+    mouseDown(pointer) {
+        if (this.state == State.INPROGRESS)
+            return // do nonthing if simulationn in progress
+
+        console.log("mouse down");
+        console.log(pointer);
+    }
+
     preload ()
     {
         this.load.image('rocket', rocketImg);
@@ -119,12 +128,9 @@ class MyGame extends Phaser.Scene
         this.resetButtton = new Button(130, 850, 'Reset', this, () => {this.resetSimulation()});
         
         // Set up mouse controls
-        this.input.on('pointerup', (pointer) => {
-
-        });
-
-
-        this.resetSimulation()
+        this.input.on('pointerdown', (pointer) => this.mouseDown(pointer));
+        
+        this.resetSimulation();
 
     }
 

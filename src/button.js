@@ -7,11 +7,14 @@ export class Button {
             .setScrollFactor(0)
             .setStyle({ backgroundColor: '#333'})
             .setInteractive({ useHandCursor: true })
-            .on('pointerdown', this.ifEnabled(() => callback()))
+            .on('pointerdown', (pointer,x,y,event) => {
+                event.stopPropagation();
+                this.ifEnabled(() => callback())()
+            })
          //   .on('pointerover', () => button.setStyle({ fill: '#f39c12' }))
          //   .on('pointerout', () => button.setStyle({ fill: '#FFF' }));
             .on('pointerover', this.ifEnabled(() => button.setStyle({ backgroundColor: '#777' })))
-            .on('pointerout', () => button.setStyle({ backgroundColor: '#333' }));
+            .on('pointerout', (() => button.setStyle({ backgroundColor: '#333' })));
         this.button = button;
         this.enable()
 
@@ -38,4 +41,5 @@ export class Button {
                 return wrapped.apply(this, arguments);
         }
     }
+
 }
