@@ -1,6 +1,5 @@
 export class Button {
     constructor(x, y, label, scene, callback) {
-        this.enable()
         
         const button = scene.add.text(x, y, label)
             .setOrigin(0.5)
@@ -12,8 +11,10 @@ export class Button {
          //   .on('pointerover', () => button.setStyle({ fill: '#f39c12' }))
          //   .on('pointerout', () => button.setStyle({ fill: '#FFF' }));
             .on('pointerover', this.ifEnabled(() => button.setStyle({ backgroundColor: '#777' })))
-            .on('pointerout', this.ifEnabled(() => button.setStyle({ backgroundColor: '#333' })));
+            .on('pointerout', () => button.setStyle({ backgroundColor: '#333' }));
         this.button = button;
+        this.enable()
+
     }
     setText(text) {
         this.button.text = text;
@@ -21,10 +22,12 @@ export class Button {
 
     disable() {
         this.enabled = false;
+        this.button.setStyle({ fill: '#777', backgroundColor: '#333' })
     }
 
     enable() {
         this.enabled = true;
+        this.button.setStyle({ fill: '#FFF' })
     }
     
     ifEnabled(wrapped) {

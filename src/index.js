@@ -3,12 +3,40 @@ import rocketImg from './res/iss.png';
 import earthImg from './res/earth.jpg';
 import {Button} from './button.js'
 
+const State = {
+    INIT: 0,
+    DRAGGING: 1, // mouse dragging
+    INPROGRESS: 2, // running or paused
+}
 
 class MyGame extends Phaser.Scene
 {
     constructor ()
     {
         super();        
+    }
+
+    setState(state) {
+        this.state = state;
+        if (state == State.INIT) {
+            this.startButton.enable();
+            this.resetButtton.disable();
+        } else if (state == State.DRAGGING) {
+            this.startButton.disable();
+            this.resetButtton.disable();
+        } else if (state == State.INPROGRESS) {
+            this.startButton.enable();
+            this.resetButtton.enable();
+        }
+    }
+
+    // only process mouse movements if reset
+    stateGuard(wrapped, state) {
+        game = this;
+        return function() {
+            if (game.state == state) 
+                return wrapped.apply(this, arguments);
+        }
     }
 
     resetSimulation() 
@@ -21,17 +49,23 @@ class MyGame extends Phaser.Scene
         this.rocket.y = this.rocketpos.y;  
 
         this.toggleSimulation(false)
+        this.setState(State.INIT);
 
     }
 
     toggleSimulation(force)
     {
-        if (force==undefined)
+        if (this.state == State.INIT) {
+            this.setState(State.INPROGRESS);
+            this.running = true;
+        } else if (this.state != State.INPROGRESS) {
+            return;
+        } else if (force==undefined)
             this.running = !this.running;
         else
             this.running = force;
 
-        this.startButton.setText(this.running ? "Pause" : "Start");      
+        this.startButton.setText(this.running ? "Pause" : "Start"); 
     }
 
     
@@ -70,25 +104,33 @@ class MyGame extends Phaser.Scene
 
     create ()
     {
+        // Set up camera
         this.cameras.main.setBounds(-config.width/2, -config.height/2,config.width/2, config.height/2);
 
+        // Set up srites
         this.earth = this.add.image(0, 0, 'earth');
         this.earth.setScale(0.3);
             
         this.rocket = this.add.image(0,0, 'rocket')
         this.rocket.setScale(0.13);
 
-
+        // Set up buttons
         this.startButton = new Button(50, 850, 'Start', this, () => {this.toggleSimulation()});
         this.resetButtton = new Button(130, 850, 'Reset', this, () => {this.resetSimulation()});
         
+        // Set up mouse controls
+        this.input.on('pointerup', (pointer) => {
+
+        });
+
+
         this.resetSimulation()
 
     }
 
     update(time, delta)
     {
-       if (this.running) {
+       if (this.state == State.INPROGRESS && this.running) {
            this.updateSimulation(time, delta);
        }
     }
