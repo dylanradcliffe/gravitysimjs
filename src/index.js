@@ -12,7 +12,7 @@ const State = {
 const SPEED_MULTIPLIER = Phaser.Math.GetSpeed(1,1);
 const START_SPEED = 100;
 
-const DRAG_SCALER = 0.2;
+const DRAG_SCALER = 0.5;
 const DRAG_SPEED_SNAP = 5;
 const DRAG_ANGLE_SNAP = 10;
 
@@ -134,19 +134,35 @@ class MyGame extends Phaser.Scene
 
     drawArrow() {
         //this.graphics.clear();
-        this.graphics.lineStyle(10, 0xffffff, 1);
+        this.graphics.lineStyle(5, 0xffffff, 1);
         this.graphics.beginPath();
 
         const arrowVector = new Phaser.Math.Vector2(this.rocketv.x/DRAG_SCALER/SPEED_MULTIPLIER,
                                                     this.rocketv.y/DRAG_SCALER/SPEED_MULTIPLIER
             );
-                                  
-        arrowVector.scale(1.2);
+                   
+            
+        const arrowhead1 = new Phaser.Math.Vector2(-25,-25)
+        const arrowhead2 = new Phaser.Math.Vector2(-25, 25)
+        
+        arrowhead1.rotate(arrowVector.angle());
+        arrowhead2.rotate(arrowVector.angle());
 
-        this.graphics.moveTo(this.rocketpos.x + arrowVector.x*0.2,
-                             this.rocketpos.y + arrowVector.y*0.2)
-        this.graphics.lineTo(this.rocketpos.x + arrowVector.x, 
-                            this.rocketpos.y + arrowVector.y);
+        // now transpose the arrow.
+        const trans = (new Phaser.Math.Vector2(arrowVector)).scale(0.2);
+        trans.add(this.rocketpos);
+        
+        arrowVector.add(trans);
+        arrowhead1.add(arrowVector);
+        arrowhead2.add(arrowVector);
+
+        this.graphics.moveTo(trans.x, trans.y);
+        this.graphics.lineTo(arrowVector.x, arrowVector.y);
+        this.graphics.lineTo(arrowhead1.x, arrowhead1.y);
+        this.graphics.moveTo(arrowVector.x, arrowVector.y);
+        this.graphics.lineTo(arrowhead2.x, arrowhead2.y);    
+                            
+
         this.graphics.strokePath();
         this.graphics.closePath();
       
@@ -194,12 +210,15 @@ class MyGame extends Phaser.Scene
     update(time, delta)
     {
         this.graphics.clear();
-       if (this.state == State.INPROGRESS && this.running) {
-           this.updateSimulation(time, delta);
-       } else if (this.state == State.DRAGGING) {
-           this.updateVelocity(this.input.activePointer);
-           this.drawArrow();
-       }
+        if (this.state == State.INPROGRESS && this.running) {
+            this.updateSimulation(time, delta);
+        } else if (this.state == State.DRAGGING) {
+            this.updateVelocity(this.input.activePointer);
+            this.drawArrow();
+        } else if (this.state == State.INIT) {
+            this.drawArrow();
+
+        }
 
        // show velocity
        // show velocity
