@@ -7,6 +7,7 @@ const State = {
     INIT: 0,
     DRAGGING: 1, // mouse dragging
     INPROGRESS: 2, // running or paused
+    CRASHED: 3, // rocket has crashed
 }
 
 const SPEED_MULTIPLIER = Phaser.Math.GetSpeed(1,1);
@@ -27,13 +28,20 @@ class MyGame extends Phaser.Scene
         this.state = state;
         if (state == State.INIT) {
             this.startButton.enable();
-            this.resetButtton.disable();
+            this.resetButtton.enable();
+            this.rocket.visible = true;
         } else if (state == State.DRAGGING) {
             this.startButton.disable();
             this.resetButtton.disable();
+            this.rocket.visible = true;
         } else if (state == State.INPROGRESS) {
             this.startButton.enable();
             this.resetButtton.enable();
+            this.rocket.visible = true;
+        } else if (state == State.CRASHED) {
+            this.startButton.disable();
+            this.resetButtton.enable();
+            this.rocket.visible = false;
         }
     }
 
@@ -168,6 +176,9 @@ class MyGame extends Phaser.Scene
       
     }
 
+    crash() {
+        this.setState(State.CRASHED);
+    }
 
     preload ()
     {
@@ -184,11 +195,18 @@ class MyGame extends Phaser.Scene
         this.cameras.main.setBounds(-config.width/2, -config.height/2,config.width/2, config.height/2);
 
         // Set up srites
-        this.earth = this.add.image(0, 0, 'earth');
+        this.earth = this.matter.add.image(0, 0, 'earth').setStatic(true);
+        //this.earth = this.add.image(0, 0, 'earth');// radius of ~250
+        this.earth.setBody({type: 'circle', radius: 250});
+        this.earth.setStatic(true);
+        //const circleCollision = this.matter.add.circle(0, 0, 75;
+        //circleCollision.
+
         this.earth.setScale(0.3);
             
-        this.rocket = this.add.image(0,0, 'rocket')
+        this.rocket = this.matter.add.image(0,0, 'rocket').setBounce(0);
         this.rocket.setScale(0.13);
+        
 
         this.velocityText = this.add.text(1300,0, "Speed:1000  Angle:999°")
             .setScrollFactor(0)
@@ -202,6 +220,8 @@ class MyGame extends Phaser.Scene
         // Set up mouse controls
         this.input.on('pointerdown', (pointer) => this.mouseDown(pointer));
         this.graphics = this.add.graphics();
+
+        this.matter.world.on('collisionstart', () => this.crash());
 
         this.resetSimulation();
 
@@ -254,7 +274,16 @@ const config = {
         forceSetTimeOut: true
     },
     
-        
+    physics: {
+        default: 'matter',
+        matter: {
+            gravity: {
+                x: 0,
+                y: 0
+            },
+            debug: false,
+        }
+    },
 };
 
 const G = 3.0;
