@@ -2,9 +2,8 @@ export class Button {
     constructor(x, y, label, scene, callback) {
         
         const button = scene.add.text(x, y, label)
-            .setOrigin(0.5)
             .setPadding(10)
-            .setScrollFactor(0)
+//            .setScrollFactor(0)
             .setStyle({ backgroundColor: '#333'})
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', (pointer,x,y,event) => {

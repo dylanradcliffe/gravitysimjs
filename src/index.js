@@ -28,22 +28,22 @@ class MyGame extends Phaser.Scene
         this.state = state;
         if (state == State.INIT) {
             this.startButton.enable();
-            this.resetButtton.enable();
+            this.resetButton.enable();
             this.rocket.visible = true;
             this.crashText.setVisible(false);
         } else if (state == State.DRAGGING) {
             this.startButton.disable();
-            this.resetButtton.disable();
+            this.resetButton.disable();
             this.rocket.visible = true;
             this.crashText.setVisible(false);
         } else if (state == State.INPROGRESS) {
             this.startButton.enable();
-            this.resetButtton.enable();
+            this.resetButton.enable();
             this.rocket.visible = true;
             this.crashText.setVisible(false);
         } else if (state == State.CRASHED) {
             this.startButton.disable();
-            this.resetButtton.enable();
+            this.resetButton.enable();
             this.rocket.visible = false;
             this.crashText.setVisible(true);
         }
@@ -135,7 +135,7 @@ class MyGame extends Phaser.Scene
     updateVelocity(pointer) {
         const delta = new Phaser.Math.Vector2(pointer.position)
         delta.subtract(this.startDragPos)
-        const speed = Phaser.Math.RoundTo(delta.length() * DRAG_SCALER, 1, DRAG_SPEED_SNAP)
+        const speed = Phaser.Math.RoundTo(delta.length() * DRAG_SCALER / this.zoomFactor, 1, DRAG_SPEED_SNAP)
         //const speed = delta.length() * DRAG_SCALER
         const angle = Phaser.Math.RoundTo(Phaser.Math.RadToDeg(delta.angle()), 1, DRAG_ANGLE_SNAP)
 
@@ -186,6 +186,20 @@ class MyGame extends Phaser.Scene
         this.setState(State.CRASHED);
     }
 
+
+    zoom (factor) {
+        this.cameras.main.setZoom(factor, factor);
+        this.zoomFactor = factor;
+    }
+
+    zoomIn() {
+        this.zoom(this.zoomFactor * 2);
+    }
+
+    zoomOut() {
+        this.zoom(this.zoomFactor / 2);
+    }
+
     preload ()
     {
         this.load.image('rocket', rocketImg);
@@ -197,47 +211,54 @@ class MyGame extends Phaser.Scene
 
     create ()
     {
-        // Set up camera
-        this.cameras.main.setBounds(-config.width/2, -config.height/2,config.width/2, config.height/2);
-
-        // Set up srites
+        // Set up sprites
         this.earth = this.matter.add.image(0, 0, 'earth').setStatic(true);
-        //this.earth = this.add.image(0, 0, 'earth');// radius of ~250
         this.earth.setBody({type: 'circle', radius: 250});
         this.earth.setStatic(true);
-        //const circleCollision = this.matter.add.circle(0, 0, 75;
-        //circleCollision.
-
         this.earth.setScale(0.3);
             
         this.rocket = this.matter.add.image(0,0, 'rocket').setBounce(0);
         this.rocket.setScale(0.13);
         
-
+        // Set up display text
         this.velocityText = this.add.text(1300,0, "Speed:1000  Angle:999°")
-            .setScrollFactor(0)
+//            .setScrollFactor(0)
             .setStyle({ fontSize: '20px' })
             .setFontFamily('courier')
 
-        // Set up buttons
-        this.startButton = new Button(50, 850, 'Start', this, () => {this.toggleSimulation()});
-        this.resetButtton = new Button(130, 850, 'Reset', this, () => {this.resetSimulation()});
-        
-        // Set up mouse controls
-        this.input.on('pointerdown', (pointer) => this.mouseDown(pointer));
-        this.graphics = this.add.graphics();
-
-        this.matter.world.on('collisionstart', () => this.crash());
-
-
         // Set crash text
         this.crashText = this.add.text(700, 800, "CRASHED!")
-            .setScrollFactor(0)
+//            .setScrollFactor(0)
             .setStyle({ fontSize: '40px' })
+
+        // Set up buttons
+        this.startButton = new Button(50, 850, 'Start', this, () => {this.toggleSimulation()});
+        this.resetButton = new Button(130, 850, 'Reset', this, () => {this.resetSimulation()});
+        this.zoomInButton = new Button(1420, 850, '+', this, () => {this.zoomIn()});
+        this.zoomOutButton = new Button(1470, 850, '-', this, () => {this.zoomOut()});
+
+        // Set up events 
+        this.input.on('pointerdown', (pointer) => this.mouseDown(pointer));
+        this.graphics = this.add.graphics();
+        this.matter.world.on('collisionstart', () => this.crash());
+
+    
+        // Set up cameras
+        //main
+        this.cameras.main.ignore([this.startButton.button, this.resetButton.button,
+                                  this.zoomInButton.button, this.zoomOutButton.button,
+                                  this.velocityText, this.crashText])
+        this.cameras.main.centerOn(0,0);
+        this.zoom(1);
+
+        // UI came
+        const UICam = this.cameras.add();
+        UICam.ignore([this.earth, this.rocket, this.graphics]);
 
         this.resetSimulation();
 
 
+        
 
     }
 
