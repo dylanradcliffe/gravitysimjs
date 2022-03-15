@@ -18,7 +18,13 @@ const DRAG_SCALER = 0.5;
 const DRAG_SPEED_SNAP = 5;
 const DRAG_ANGLE_SNAP = 10;
 
-const MAX_TRAIL_SIZE = 10;
+const MAX_TRAIL_SIZE = 1000;
+const TRAIL_GRAD_START = 0xa0a0a0
+const TRAIL_GRAD_END = 0x505050
+
+const trailGraident = (pos) =>{
+    return TRAIL_GRAD_START ;//+ (TRAIL_GRAD_END - TRAIL_GRAD_START) * (pos/MAX_TRAIL_SIZE);
+}
 
 class MyGame extends Phaser.Scene
 {
@@ -65,7 +71,7 @@ class MyGame extends Phaser.Scene
     {
         this.rocketpos = new Phaser.Math.Vector2(0, -250);
         this.rocketv = new Phaser.Math.Vector2(START_SPEED * SPEED_MULTIPLIER, 0);
-        this.trail = new RingBuffer(3, true);
+        this.trail = new RingBuffer(MAX_TRAIL_SIZE, true);
             
         // update sprite 
         this.rocket.x = this.rocketpos.x;
@@ -90,14 +96,12 @@ class MyGame extends Phaser.Scene
         this.startButton.setText(this.running ? "Pause" : "Start"); 
     }
 
-    addToTrail(pos) {
-       // if (this.trail.length > )
-    }
+   
 
     updateSimulation(time, delta)
     {
         // save previous pos in trail
-        this.addToTrail(this.rocketpos);
+        this.trail.write(this.rocketpos.clone());
 
         // update position
         //console.log(this.rocketpos)
@@ -191,6 +195,22 @@ class MyGame extends Phaser.Scene
       
     }
 
+    drawTrail() {
+        this.graphics.beginPath();
+
+        var posCount = 0;
+        for (const pos of this.trail) {
+            this.graphics.lineStyle(1, trailGraident(posCount++), 1);
+            if (posCount == 0)
+                this.graphics.moveTo(pos.x, pos.y);
+            else
+                this.graphics.lineTo(pos.x, pos.y);
+        }
+
+        this.graphics.strokePath();
+        this.graphics.closePath();
+    }
+
     crash() {
         this.setState(State.CRASHED);
     }
@@ -276,11 +296,14 @@ class MyGame extends Phaser.Scene
         this.graphics.clear();
         if (this.state == State.INPROGRESS && this.running) {
             this.updateSimulation(time, delta);
+            this.drawTrail();
         } else if (this.state == State.DRAGGING) {
             this.updateVelocity(this.input.activePointer);
             this.drawArrow();
         } else if (this.state == State.INIT) {
             this.drawArrow();
+        } else if (this.state == State.CRASHED) {
+            this.drawTrail();
         }
 
        // show velocity
