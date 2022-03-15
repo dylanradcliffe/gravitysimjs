@@ -70,15 +70,15 @@ class MyGame extends Phaser.Scene
 
     toggleSimulation(force)
     {
-        if (this.state == State.INIT) {
+        if (force !== undefined) {
+            this.running = force;
+        } else if (this.state == State.INIT) {
             this.setState(State.INPROGRESS);
             this.running = true;
-       
+            
         } else if (force==undefined)
             this.running = !this.running;
-        else
-            this.running = force;
-
+       
         this.startButton.setText(this.running ? "Pause" : "Start"); 
     }
 
@@ -141,7 +141,10 @@ class MyGame extends Phaser.Scene
 
     drawArrow() {
         //this.graphics.clear();
-        this.graphics.lineStyle(5, 0xffffff, 1);
+
+        const colour = this.state == State.DRAGGING ? 0xff2020 : 0xffffff;
+
+        this.graphics.lineStyle(5, colour, 1);
         this.graphics.beginPath();
 
         const arrowVector = new Phaser.Math.Vector2(this.rocketv.x/DRAG_SCALER/SPEED_MULTIPLIER,
