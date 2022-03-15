@@ -73,8 +73,7 @@ class MyGame extends Phaser.Scene
         if (this.state == State.INIT) {
             this.setState(State.INPROGRESS);
             this.running = true;
-        } else if (this.state != State.INPROGRESS) {
-            return;
+       
         } else if (force==undefined)
             this.running = !this.running;
         else
