@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import rocketImg from './res/iss.png';
 import earthImg from './res/earth.jpg';
 import {Button} from './button.js'
+import {RingBuffer} from './ringbuffer.js'
 
 const State = {
     INIT: 0,
@@ -16,6 +17,8 @@ const START_SPEED = 100;
 const DRAG_SCALER = 0.5;
 const DRAG_SPEED_SNAP = 5;
 const DRAG_ANGLE_SNAP = 10;
+
+const MAX_TRAIL_SIZE = 10;
 
 class MyGame extends Phaser.Scene
 {
@@ -62,6 +65,7 @@ class MyGame extends Phaser.Scene
     {
         this.rocketpos = new Phaser.Math.Vector2(0, -250);
         this.rocketv = new Phaser.Math.Vector2(START_SPEED * SPEED_MULTIPLIER, 0);
+        this.trail = new RingBuffer(3, true);
             
         // update sprite 
         this.rocket.x = this.rocketpos.x;
@@ -86,10 +90,15 @@ class MyGame extends Phaser.Scene
         this.startButton.setText(this.running ? "Pause" : "Start"); 
     }
 
-    
+    addToTrail(pos) {
+       // if (this.trail.length > )
+    }
 
     updateSimulation(time, delta)
     {
+        // save previous pos in trail
+        this.addToTrail(this.rocketpos);
+
         // update position
         //console.log(this.rocketpos)
         //console.log(this.rocketv)
