@@ -30,18 +30,22 @@ class MyGame extends Phaser.Scene
             this.startButton.enable();
             this.resetButtton.enable();
             this.rocket.visible = true;
+            this.crashText.setVisible(false);
         } else if (state == State.DRAGGING) {
             this.startButton.disable();
             this.resetButtton.disable();
             this.rocket.visible = true;
+            this.crashText.setVisible(false);
         } else if (state == State.INPROGRESS) {
             this.startButton.enable();
             this.resetButtton.enable();
             this.rocket.visible = true;
+            this.crashText.setVisible(false);
         } else if (state == State.CRASHED) {
             this.startButton.disable();
             this.resetButtton.enable();
             this.rocket.visible = false;
+            this.crashText.setVisible(true);
         }
     }
 
@@ -225,7 +229,15 @@ class MyGame extends Phaser.Scene
 
         this.matter.world.on('collisionstart', () => this.crash());
 
+
+        // Set crash text
+        this.crashText = this.add.text(700, 800, "CRASHED!")
+            .setScrollFactor(0)
+            .setStyle({ fontSize: '40px' })
+
         this.resetSimulation();
+
+
 
     }
 
@@ -239,7 +251,6 @@ class MyGame extends Phaser.Scene
             this.drawArrow();
         } else if (this.state == State.INIT) {
             this.drawArrow();
-
         }
 
        // show velocity
