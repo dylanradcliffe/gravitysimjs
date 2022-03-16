@@ -236,7 +236,13 @@ class MyGame extends Phaser.Scene
 
     }
     
+
     
+    openExternalLink (url)
+    {
+        var s = window.open(url, '_blank');
+    }
+
 
     create ()
     {
@@ -263,19 +269,23 @@ class MyGame extends Phaser.Scene
         // Set up buttons
         this.startButton = new Button(50, 850, 'Start', this, () => {this.toggleSimulation()});
         this.resetButton = new Button(130, 850, 'Reset', this, () => {this.resetSimulation()});
-        this.zoomInButton = new Button(1420, 850, '+', this, () => {this.zoomIn()});
-        this.zoomOutButton = new Button(1470, 850, '-', this, () => {this.zoomOut()});
+        this.zoomInButton = new Button(1500, 850, '+', this, () => {this.zoomIn()});
+        this.zoomOutButton = new Button(1540, 850, '-', this, () => {this.zoomOut()});
+        this.aboutButton = new Button(50, 10, 'About', this, () => {
+                this.openExternalLink('https://github.com/dylanradcliffe/gravitysimjs#simple-gravity-simulation-written-in-javascript')
+            });
 
         // Set up events 
         this.input.on('pointerdown', (pointer) => this.mouseDown(pointer));
         this.graphics = this.add.graphics();
-        this.matter.world.on('collisionstart', () => this.crash());
+        this.matter.world.on('collisionstart', () => this.crash());;
 
     
         // Set up cameras
         //main
         this.cameras.main.ignore([this.startButton.button, this.resetButton.button,
                                   this.zoomInButton.button, this.zoomOutButton.button,
+                                  this.aboutButton.button,
                                   this.velocityText, this.crashText])
         this.cameras.main.centerOn(0,0);
         this.zoom(1);
@@ -309,7 +319,7 @@ class MyGame extends Phaser.Scene
        // show velocity
        // show velocity
        const speed = this.rocketv.length() / SPEED_MULTIPLIER
-       const angle = Phaser.Math.RadToDeg(this.rocketv.angle());
+       const angle = (360 - Phaser.Math.RadToDeg(this.rocketv.angle())) % 360;  // reverse 
        const speedStr = speed.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
                    .padStart(5, " ")
        const angleStr = angle.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
