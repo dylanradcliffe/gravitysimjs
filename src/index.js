@@ -97,9 +97,15 @@ class MyGame extends Phaser.Scene
     resetSimulation() 
     {
         this.rocketpos = new Phaser.Math.Vector2(0, -250);
-        this.rocketv = new Phaser.Math.Vector2(START_SPEED * SPEED_MULTIPLIER, 0);
         this.trail = new RingBuffer(MAX_TRAIL_SIZE, true);
-            
+        
+        if (this.state == State.INIT || this.state === undefined) { 
+            this.rocketv = new Phaser.Math.Vector2(START_SPEED * SPEED_MULTIPLIER, 0);
+            this.startingRocketv = this.rocketv.clone();
+        } else {
+            this.rocketv = this.startingRocketv.clone();
+        }
+
         // update sprite 
         this.rocket.x = this.rocketpos.x;
         this.rocket.y = this.rocketpos.y;  
@@ -131,8 +137,6 @@ class MyGame extends Phaser.Scene
         this.trail.write(this.rocketpos.clone());
 
         // update position
-        //console.log(this.rocketpos)
-        //console.log(this.rocketv)
         this.rocketpos.add(new Phaser.Math.Vector2(this.rocketv).scale(delta))
         
         // update velocity
@@ -141,9 +145,7 @@ class MyGame extends Phaser.Scene
         const deltav = accel.scale(delta)
         this.rocketv.add(deltav)
 
-        //console.log(rsquared)
-        //console.log(accel)
-        //console.log(deltav)
+
         
 
         // update sprite 
@@ -194,7 +196,8 @@ class MyGame extends Phaser.Scene
             speed = this.rocketv.length() / SPEED_MULTIPLIER;
         }
         //const speed = delta.length() * DRAG_SCALER
-        this.rocketv.setToPolar(Phaser.Math.DegToRad(angle), speed * SPEED_MULTIPLIER)
+        this.rocketv.setToPolar(Phaser.Math.DegToRad(angle), speed * SPEED_MULTIPLIER);
+        this.startingRocketv = this.rocketv.clone();
     }
 
 
@@ -302,7 +305,6 @@ class MyGame extends Phaser.Scene
             && event.keyCode >= Phaser.Input.Keyboard.KeyCodes.ZERO
             && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NINE) {
             this.enteredText += event.key;
-            console.log(this.enteredText)
         }
     }
 
