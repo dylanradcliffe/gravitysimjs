@@ -11,6 +11,12 @@ const State = {
     CRASHED: 3, // rocket has crashed
 }
 
+const Focus = {
+    SPEED: 0,
+    ANGLE: 1,
+    MAX: 1
+}
+
 const SPEED_MULTIPLIER = Phaser.Math.GetSpeed(1,1);
 const START_SPEED = 100;
 
@@ -45,6 +51,8 @@ class MyGame extends Phaser.Scene
             this.resetButton.disable();
             this.rocket.visible = true;
             this.crashText.setVisible(false);
+            this.focus = Focus.MAX;
+            this.toggleFocus()
         } else if (state == State.INPROGRESS) {
             this.startButton.enable();
             this.resetButton.enable();
@@ -55,6 +63,15 @@ class MyGame extends Phaser.Scene
             this.resetButton.enable();
             this.rocket.visible = false;
             this.crashText.setVisible(true);
+        }
+    }
+
+
+    // keyboard input toggle
+    toggleFocus() {
+        this.focus = (this.focus + 1) % Focus.MAX;
+        if (this.focus == Focus.SPEED) {
+
         }
     }
 
@@ -129,9 +146,6 @@ class MyGame extends Phaser.Scene
 
 
     mouseDown(pointer) {
-        console.log("MOUSE DOWN!!!")
-        console.log(this.rocketv.length() + " --- " + this.rocketv.angle())
-
         if (this.state == State.INPROGRESS)
             return; // do nonthing if simulationn in progress
         
@@ -256,14 +270,15 @@ class MyGame extends Phaser.Scene
         this.rocket.setScale(0.13);
         
         // Set up display text
-        this.velocityText = this.add.text(1300,0, "Speed:1000  Angle:999°")
-//            .setScrollFactor(0)
+        this.speedText = this.add.text(1450,0, "Speed:1000")
+            .setStyle({ fontSize: '20px' })
+            .setFontFamily('courier')
+        this.angleText = this.add.text(1450,this.speedText.height, "Angle:999°")
             .setStyle({ fontSize: '20px' })
             .setFontFamily('courier')
 
         // Set crash text
         this.crashText = this.add.text(700, 800, "CRASHED!")
-//            .setScrollFactor(0)
             .setStyle({ fontSize: '40px' })
 
         // Set up buttons
@@ -286,7 +301,7 @@ class MyGame extends Phaser.Scene
         this.cameras.main.ignore([this.startButton.button, this.resetButton.button,
                                   this.zoomInButton.button, this.zoomOutButton.button,
                                   this.aboutButton.button,
-                                  this.velocityText, this.crashText])
+                                  this.speedText, this.angleText, this.crashText])
         this.cameras.main.centerOn(0,0);
         this.zoom(1);
 
@@ -316,18 +331,17 @@ class MyGame extends Phaser.Scene
             this.drawTrail();
         }
 
-       // show velocity
-       // show velocity
-       const speed = this.rocketv.length() / SPEED_MULTIPLIER
-       const angle = (450 - Phaser.Math.RadToDeg(this.rocketv.angle())) % 360;  // reverse 
-       const speedStr = speed.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
+        // show velocity
+        // show velocity
+        const speed = this.rocketv.length() / SPEED_MULTIPLIER
+        const angle = (450 - Phaser.Math.RadToDeg(this.rocketv.angle())) % 360;  // reverse 
+        const speedStr = speed.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
                    .padStart(4, " ")
-       const angleStr = angle.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
+        const angleStr = angle.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
                    .padStart(3, " ")
 
-       this.velocityText.text = 'Speed: ' + speedStr +  '  Angle: ' + angleStr +'°'
-
-       
+        this.speedText.text = 'Speed: ' + speedStr;
+        this.angleText.text = 'Angle:  ' + angleStr +'°'
        
 
     }
