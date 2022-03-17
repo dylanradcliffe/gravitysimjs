@@ -12,9 +12,10 @@ const State = {
 }
 
 const Focus = {
-    SPEED: 0,
-    ANGLE: 1,
-    MAX: 1
+    BOTH: 0,
+    SPEED: 1,
+    ANGLE: 2,
+    MAX: 2
 }
 
 const SPEED_MULTIPLIER = Phaser.Math.GetSpeed(1,1);
@@ -42,6 +43,8 @@ class MyGame extends Phaser.Scene
     setState(state) {
         this.state = state;
         if (state == State.INIT) {
+            this.angleText.clearTint();
+            this.speedText.clearTint();
             this.startButton.enable();
             this.resetButton.enable();
             this.rocket.visible = true;
@@ -69,9 +72,16 @@ class MyGame extends Phaser.Scene
 
     // keyboard input toggle
     toggleFocus() {
-        this.focus = (this.focus + 1) % Focus.MAX;
-        if (this.focus == Focus.SPEED) {
-
+        this.focus = (this.focus + 1) % (Focus.MAX+1);
+        if (this.focus == Focus.BOTH) {
+            this.speedText.setTint(0xFF0000);
+            this.angleText.setTint(0xFF0000);
+        } else if (this.focus == Focus.SPEED) {
+            this.speedText.setTint(0xFF0000);
+            this.angleText.clearTint();
+        } else {
+            this.angleText.setTint(0xFF0000);
+            this.speedText.clearTint();
         }
     }
 
@@ -160,12 +170,30 @@ class MyGame extends Phaser.Scene
     }
 
     updateVelocity(pointer) {
-        const delta = new Phaser.Math.Vector2(pointer.position)
-        delta.subtract(this.startDragPos)
-        const speed = Phaser.Math.RoundTo(delta.length() * DRAG_SCALER / this.zoomFactor, 1, DRAG_SPEED_SNAP)
-        //const speed = delta.length() * DRAG_SCALER
-        const angle = Phaser.Math.RoundTo(Phaser.Math.RadToDeg(delta.angle()), 1, DRAG_ANGLE_SNAP)
+        var speed;
+        var angle;
+        if (this.focus == Focus.BOTH) { // using the mouse to set speed
+            const delta = new Phaser.Math.Vector2(pointer.position)
+            delta.subtract(this.startDragPos)
+            speed = Phaser.Math.RoundTo(delta.length() * DRAG_SCALER / this.zoomFactor, 1, DRAG_SPEED_SNAP)
+            angle = Phaser.Math.RoundTo(Phaser.Math.RadToDeg(delta.angle()), 1, DRAG_ANGLE_SNAP)
 
+        } else if (this.focus == Focus.SPEED) { // using the keyboard
+            if (this.enteredText == "") {
+                return;
+            } else {
+                speed = parseInt(this.enteredText.substr(0,4));
+            }
+            angle = Phaser.Math.RadToDeg(this.rocketv.angle());
+        } else if (this.focus == Focus.ANGLE) {
+            if (this.enteredText == "") {
+                return;
+            } else {
+                angle = 450 - parseInt(this.enteredText.substr(0,3)); // have to convert
+            }
+            speed = this.rocketv.length() / SPEED_MULTIPLIER;
+        }
+        //const speed = delta.length() * DRAG_SCALER
         this.rocketv.setToPolar(Phaser.Math.DegToRad(angle), speed * SPEED_MULTIPLIER)
     }
 
@@ -257,6 +285,26 @@ class MyGame extends Phaser.Scene
         var s = window.open(url, '_blank');
     }
 
+    processKey(event) {
+        if (event.keyCode == Phaser.Input.Keyboard.KeyCodes.ENTER) {
+            this.enteredText = "";
+            if (this.state == State.INIT) {
+                this.setState(State.DRAGGING);
+                this.toggleFocus();
+            } else if (this.state == State.DRAGGING) {
+                if (this.focus == Focus.MAX) {
+                    this.setState(State.INIT);
+                } else {
+                    this.toggleFocus();
+                }
+            }
+        } else if (this.state == State.DRAGGING 
+            && event.keyCode >= Phaser.Input.Keyboard.KeyCodes.ZERO
+            && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NINE) {
+            this.enteredText += event.key;
+            console.log(this.enteredText)
+        }
+    }
 
     create ()
     {
@@ -293,9 +341,9 @@ class MyGame extends Phaser.Scene
         // Set up events 
         this.input.on('pointerdown', (pointer) => this.mouseDown(pointer));
         this.graphics = this.add.graphics();
-        this.matter.world.on('collisionstart', () => this.crash());;
+        this.matter.world.on('collisionstart', () => this.crash());
+        this.input.keyboard.on('keyup', (event)=>this.processKey(event));
 
-    
         // Set up cameras
         //main
         this.cameras.main.ignore([this.startButton.button, this.resetButton.button,
