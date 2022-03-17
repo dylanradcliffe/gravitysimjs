@@ -319,13 +319,13 @@ class MyGame extends Phaser.Scene
        // show velocity
        // show velocity
        const speed = this.rocketv.length() / SPEED_MULTIPLIER
-       const angle = (360 - Phaser.Math.RadToDeg(this.rocketv.angle())) % 360;  // reverse 
+       const angle = (450 - Phaser.Math.RadToDeg(this.rocketv.angle())) % 360;  // reverse 
        const speedStr = speed.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
-                   .padStart(5, " ")
+                   .padStart(4, " ")
        const angleStr = angle.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
                    .padStart(3, " ")
 
-       this.velocityText.text = 'Speed:' + speedStr +  '  Angle:' + angleStr +'°'
+       this.velocityText.text = 'Speed: ' + speedStr +  '  Angle: ' + angleStr +'°'
 
        
        
