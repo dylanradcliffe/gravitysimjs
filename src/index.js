@@ -56,6 +56,7 @@ class MyGame extends Phaser.Scene
             this.crashText.setVisible(false);
             this.focus = Focus.MAX;
             this.toggleFocus()
+            this.savedRocketv = this.rocketv.clone();
         } else if (state == State.INPROGRESS) {
             this.startButton.enable();
             this.resetButton.enable();
@@ -182,14 +183,14 @@ class MyGame extends Phaser.Scene
 
         } else if (this.focus == Focus.SPEED) { // using the keyboard
             if (this.enteredText == "") {
-                return;
+                speed = this.savedRocketv.length() / SPEED_MULTIPLIER;
             } else {
                 speed = parseInt(this.enteredText.substr(0,4));
             }
             angle = Phaser.Math.RadToDeg(this.rocketv.angle());
         } else if (this.focus == Focus.ANGLE) {
             if (this.enteredText == "") {
-                return;
+                angle = Phaser.Math.RadToDeg(this.savedRocketv.angle());
             } else {
                 angle = 450 - parseInt(this.enteredText.substr(0,3)); // have to convert
             }
@@ -301,10 +302,15 @@ class MyGame extends Phaser.Scene
                     this.toggleFocus();
                 }
             }
-        } else if (this.state == State.DRAGGING 
-            && event.keyCode >= Phaser.Input.Keyboard.KeyCodes.ZERO
-            && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NINE) {
-            this.enteredText += event.key;
+        } else if (this.state == State.DRAGGING) {
+
+            if (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.ZERO
+                && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NINE
+                && this.enteredText.length < 4) {
+                this.enteredText += event.key;
+            } else if (event.keyCode == Phaser.Input.Keyboard.KeyCodes.BACKSPACE) {
+                this.enteredText = this.enteredText.substr(0, Math.max(0, this.enteredText.length-1))
+            }
         }
     }
 
@@ -385,13 +391,20 @@ class MyGame extends Phaser.Scene
         // show velocity
         const speed = this.rocketv.length() / SPEED_MULTIPLIER
         const angle = (450 - Phaser.Math.RadToDeg(this.rocketv.angle())) % 360;  // reverse 
+        
         const speedStr = speed.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
                    .padStart(4, " ")
         const angleStr = angle.toLocaleString('en-US', {maximumFractionDigits:0, useGrouping:false})
                    .padStart(3, " ")
 
-        this.speedText.text = 'Speed: ' + speedStr;
-        this.angleText.text = 'Angle:  ' + angleStr +'°'
+        // in entry mode display the literal string entered
+        this.speedText.text = 'Speed: ' +
+            ((this.state == State.DRAGGING && this.focus == Focus.SPEED && this.enteredText.length > 0)?
+            this.enteredText.padStart(4) : speedStr);
+        this.angleText.text = 'Angle:  ' +
+            ((this.state == State.DRAGGING && this.focus == Focus.ANGLE && this.enteredText.length > 0)?
+            this.enteredText.padStart(3) : angleStr)
+            +'°';
        
 
     }
